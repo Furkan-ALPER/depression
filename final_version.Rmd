@@ -1,0 +1,209 @@
+---
+title: "Akademik Başarıyı Etkileyen Faktörlerin Biyoistatistiksel Analizi"
+author: "Furkan"
+date: "2026-02-06"
+output: html_document
+---
+
+```{r setup}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(knitr)
+library(latexpdf)
+library(tinytex)
+data_depression <- read.csv("C:\\Users\\furka\\Desktop\\R\\Student Depression_Lifestyle\\student_lifestyle_100k.csv")
+View(data_depression)
+```
+
+## GİRİŞ
+Bu çalışmada, 100 bin gözlemden oluşan bir veri seti üzerinde, öğrencilerin akademik başarılarını (CGPA) etkileyen değişkenler incelenmiştir. Analiz kapsamında uyku süresi, çalışma saati, sosyal medya kullanımı ve stres seviyesi gibi faktörlerin etkisi biyoistatistiksel yöntemlerle analiz edilmiştir.
+
+```{r z-score}
+
+
+# I used summary() all data for look median, mean other values. 
+# z-score 
+summary(data_depression)
+
+
+# öğrencilerin ortalamasının standart sapması 2.07 gibi bir değer çıkmıştır. (departmanlar ayrılmadan) 
+cgpa <- scale(data_depression$CGPA)
+summary(cgpa)
+# uyku değerinin standart sapmasına baktığımız zaman değer 3.4 çıkmıştır.
+Sleep <- scale(data_depression$Sleep_Duration) 
+summary(Sleep)
+# çalışma süresinin standart sapması 4.20 olarak hesaplanmıştır.
+Study  <- scale(data_depression$Study_Hours)
+summary(Study)
+# sosyal medyada geçirilen zamanın standart sapması 4.4 bulunmuştur.
+Social <- scale(data_depression$Social_Media_Hours)
+summary(Social)
+# fiziksel aktivitenin standart sapması 1.7 bulunmuş olup en düşük standat sapma burdadır. 
+Physical <- scale(data_depression$Physical_Activity)
+summary(Physical)
+
+```
+# Z-SKORU
+"Analiz edilen değişkenlerin (saat, puan, aktivite sıklığı vb.) ölçü birimleri birbirinden farklı olduğu için, bu veriler scale() fonksiyonu ile standartlaştırılmış ve ortalaması 0, standart sapması 1 olan Z-skorlarına dönüştürülmüştür. Bu işlem, değişkenlerin birbirine göre olan yayılımını (variability) kıyaslamayı mümkün kılmıştır."
+1.Değişkenlik Üzerine Gözlemler:
+En Yüksek Değişkenlik (Sosyal Medya ve Çalışma Süresi): "Sosyal medya (4.4) ve çalışma süreleri (4.2), en yüksek standart sapma değerlerine sahiptir. Bu durum, öğrenci popülasyonunda bu alışkanlıkların kişiden kişiye çok büyük farklılıklar gösterdiğini, yani popülasyonun bu konuda heterojen bir yapıya sahip olduğunu kanıtlamaktadır."
+2.En Düşük Değişkenlik (Fiziksel Aktivite): "Fiziksel aktivite (1.7), en düşük standart sapmaya sahip değişkendir. Bu bulgu, öğrencilerin fiziksel aktivite alışkanlıklarının birbirine daha yakın ve homojen olduğunu göstermektedir."
+3.Akademik Başarı (CGPA): "Ortalamanın standart sapması (2.07), akademik başarıda belirgin bir farklılaşma olduğunu ancak bu farkın sosyal medya veya çalışma saati kadar uç noktalarda olmadığını ortaya koymaktadır."
+```{r boxplot}
+ggplot(data_depression,aes(x = "", y = CGPA ))+
+  geom_boxplot()+
+  geom_jitter(alpha = 0.095, size = 0.1)+
+  scale_y_log10()+
+  facet_grid(~ Department)
+
+
+# for sleep duration
+ggplot(data_depression,aes(x = "", y = Sleep_Duration ))+
+  geom_boxplot()+
+  geom_jitter(alpha = 0.095, size = 0.1)+
+  scale_y_log10()+
+  facet_grid(~ Department)
+
+# for study hours
+ggplot(data_depression,aes(x = "", y = Study_Hours ))+
+  geom_boxplot()+
+  geom_jitter(alpha = 0.095, size = 0.1)+
+  scale_y_log10()+
+  facet_grid(~ Department)
+
+
+# for social media hours
+ggplot(data_depression,aes(x = "", y = Social_Media_Hours ))+
+  geom_boxplot()+
+  geom_jitter(alpha = 0.095, size = 0.1)+
+  scale_y_log10()+
+  facet_grid(~ Department)
+
+
+# for Physical activite
+ggplot(data_depression,aes(x = "", y = Physical_Activity ))+
+  geom_boxplot()+
+  geom_jitter(alpha = 0.095, size = 0.1)+
+  scale_y_log10()+
+  facet_grid(~ Department)
+
+
+```
+# KUTU GRAFİĞİ
+Departmanlar bazında CGPA dağılımları incelendiğinde, kutu grafiklerinin (boxplot) birbirine oldukça benzer olduğu görülmektedir. Veri setindeki aykırı değerler, biyolojik ve insani çeşitliliği temsil ettiği düşünülerek kasten temizlenmemiştir
+
+
+
+```{r korelasyon grafiği}
+
+cor(data_depression$CGPA, data_depression$Sleep_Duration)
+ggplot(data_depression, aes(x = Sleep_Duration, y = CGPA))+
+  geom_point()+
+  geom_jitter(alpha = 0.90, size = 0.1)+
+  labs(
+    title = "sleep duration and CGPA correlation graph",
+    subtitle = "0.01538643",
+    x = "sleep duration",
+    y = "CGPA"
+  )
+
+
+# study hours 
+
+cor(data_depression$CGPA, data_depression$Study_Hours)
+ggplot(data_depression, aes(x = Study_Hours, y = CGPA ))+
+  geom_point()+
+  geom_jitter(alpha = 0.90, size = 0.1)+
+  labs(
+    title = "study hours and CGPA correlation graph",
+    subtitle = "0.09953408",
+    x = "study hours",
+    y = "CGPA")
+
+
+# social media
+
+cor(data_depression$CGPA, data_depression$Social_Media_Hours)
+ggplot(data_depression, aes(x = Social_Media_Hours, y = CGPA))+
+  geom_point()+
+  geom_jitter(alpha = 0.90, size = 0.1)+
+  labs(
+    title = "social media hours and CGPA correlation graph",
+    subtitle = "-0.08799796",
+    x = "social media hours",
+    y = "CGPA")
+
+
+# physical activity 
+
+cor(data_depression$CGPA, data_depression$Physical_Activity)
+ggplot(data_depression, aes(x = Physical_Activity, y = CGPA))+
+  geom_point()+
+  geom_jitter(alpha = 0.90, size = 0.1)+
+  labs(
+    title = "physical activity and CGPA correlation graph",
+    subtitle = "0.004765747",
+    x = "physical activity",
+    y = "CGPA")
+
+
+
+```
+# KORELASYON GRAFİĞİ VE HESAPLAMASI
+Bu bölümde, akademik başarı (CGPA) ile yaşam tarzı faktörleri arasındaki ikili ilişkiler Pearson korelasyon katsayısı ($r$) kullanılarak incelenmiştir."
+
+1. Çalışma Saati ve Sosyal Medya: Zıt KutuplarBulgu: "Analiz sonuçlarına göre, CGPA üzerinde en belirgin pozitif korelasyon Çalışma Saati ($r \approx 0.10$) ile saptanırken; en belirgin negatif korelasyon Sosyal Medya Kullanımı ($r \approx -0.09$) ile görülmektedir."Yorum: "Bu durum, akademik başarının disiplinli çalışma ile doğru, sosyal medyada geçirilen kontrolsüz zaman ile ters orantılı olduğunu istatistiksel olarak doğrulamaktadır."
+
+2. Uyku ve Fiziksel Aktivite: Zayıf Ama Pozitif BağlarBulgu: "Uyku süresi ($r \approx 0.015$) ve Fiziksel Aktivite ($r \approx 0.004$) ile CGPA arasında çok zayıf ancak pozitif yönlü bir ilişki gözlemlenmiştir."Yorum: "Korelasyonun bu denli düşük çıkması, bu faktörlerin başarıyı doğrudan 'tek başına' belirlemekten ziyade, diğer değişkenlerle etkileşime girerek dolaylı bir katkı sağladığını düşündürmektedir."
+
+3. Grafiklerin Görsel Yorumu (Jitter Plot Üzerine)
+Açıklama: "Grafiklerde kullanılan geom_jitter yöntemi, 100 bin satırlık verideki yoğunluğu (overplotting) aşmamıza yardımcı olmuştur. Verilerin geniş bir alana yayılması, akademik başarının 'çok faktörlü' (multifaktöriyel) doğasını ve bireysel farklılıkların yüksek olduğunu görsel olarak kanıtlamaktadır."
+
+
+```{r regresyon}
+data_new1 <- lm(data_depression$CGPA ~ data_depression$Sleep_Duration + data_depression$Study_Hours + data_depression$Social_Media_Hours + data_depression$Physical_Activity + data_depression$Stress_Level +
+                 data_depression$Department)
+summary(data_new1)
+``` 
+# REGRESYON 
+Bulgular:
+1.Pozitif Etkiler: "Çalışma saati ve uyku süresi akademik başarıyı olumlu yönde etkilemektedir."
+2.Negatif Etkiler: "Sosyal medya kullanımı ve stres seviyesi başarıyı düşüren temel faktörlerdir. Özellikle sosyal medyanın negatif etkisi, çalışma saatinin pozitif etkisinden sayısal olarak daha büyüktür."
+3.Bölüm Etkisi: "Departman katsayılarının p-değerleri anlamsızdır ($p > 0.05$); bu durum başarının bölümden bağımsız bir mekanizmayla işlediğini kanıtlamaktadır." 
+
+```{r bölümler arası}
+df <- data_depression %>% 
+  group_by(Department) %>%
+  summarise(
+    Cor_Sleep_CGPA = cor(Sleep_Duration, CGPA),
+    Cor_Study_CGPA = cor(Study_Hours, CGPA),
+    Cor_social_CGPA = cor(Social_Media_Hours, CGPA),
+    Cor_physical_CGPA = cor(Social_Media_Hours, CGPA),
+    Cor_stress_CGPA = cor(Stress_Level, CGPA)
+  )
+  
+print(df)
+```
+# BÖLÜMLER ARASI ORTALAMA VE DİĞER SÜTUNLARIN KORELASYONU
+Genel korelasyon sonuçlarının tüm alt bölümlerde (Engineering, Medical, Arts vb.) tutarlı olup olmadığını test ettim. Görüldüğü üzere, sosyal medyanın negatif etkisi ve çalışma süresinin pozitif etkisi tüm bölümlerde benzer katsayılarla seyretmektedir. Bu da bulgularımızın evrensel ve güvenilir olduğunu kanıtlamaktadır."
+
+```{r cor departmanlar arası}
+# 1. Sadece Tıp öğrencilerini filtrele
+medical_data <- data_depression %>% filter(Department == "Medical")
+
+# 2. Korelasyon testi yap (p-value ve Güven Aralığı için)
+medical_cor_test <- cor.test(medical_data$Sleep_Duration, medical_data$CGPA)
+
+# 3. Sonucu yazdır
+print(medical_cor_test)
+
+```
+# TIP FAKÜLTESİ ÖĞRENCİLERİ ÖZELİNDE
+Tıp fakültesi öğrencileri özelinde yapılan korelasyon testinde, uyku ile başarı arasında zayıf ama anlamlı bir ilişki saptanmıştır ($r \approx 0.11$). Bu durum, başarının sadece temel değişkenlerle değil; IQ, genetik ve çalışma disiplini gibi modele dahil edilmeyen çok yönlü faktörlerle açıklandığını göstermektedir."
+# SONUÇ 
+100.000 öğrencilik bu kapsamlı veri seti üzerinde yürütülen biyoistatistiksel analizler sonucunda şu temel çıkarımlara varılmıştır:
+1.Akademik başarının (CGPA) en güçlü yordayıcıları çalışma süresi (pozitif) ve sosyal medya kullanımıdır (negatif). Sosyal medyanın negatif etkisi, çalışma süresinin getirisinden sayısal olarak daha baskındır.
+2.Bölüm farkı gözetmeksizin, akademik başarı mekanizmalarının tüm departmanlarda (Mühendislik, Tıp, Sanat vb.) benzer şekilde işlediği, korelasyon ve regresyon analizleriyle doğrulanmıştır.
+3.Fiziksel aktivite ve uyku süresi, akademik başarı ile zayıf ama pozitif bir bağ sergilemektedir. Bu durum, başarının sadece tekil faktörlere değil, modele dahil edilemeyen IQ, genetik yatkınlık ve motivasyon gibi çok yönlü (multifaktöriyel) unsurlara dayandığını göstermektedir.
+4.Z-skoru ve Boxplot analizleri, verideki uç değerlerin (outliers) tüm gruplarda sistematik olarak bulunduğunu, dolayısıyla bu değerlerin birer hata değil, popülasyonun doğal bir varyasyonu olduğunu kanıtlamıştır."
